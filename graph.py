@@ -27,3 +27,6 @@ class Graph():
 
     def setData(self, n, data):
         self.node2data[n] = data
+
+    def getNodes(self):
+        return list(self.node2data.keys())
