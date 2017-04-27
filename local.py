@@ -1,0 +1,2 @@
+def local(G):
+    pass
