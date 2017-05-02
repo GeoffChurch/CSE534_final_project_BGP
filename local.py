@@ -14,7 +14,7 @@ def memoize(f):
 Message = namedtuple('Message', ['target', 'data'])
 
 class Node():
-
+    
     def __init__(self, name, scoreFunction):
         self.name = name
         self.scoreFunction = scoreFunction # [Node] => float
@@ -71,13 +71,6 @@ class Node():
 @memoize
 def randomScore(route):
     return random()
-
-
-for i in range(10):
-    print(i,randomScore(i))
-    
-for i in range(10):
-    print(i,randomScore(i))
         
 def local(G, scoreFunction=randomScore):
     # instantiate nodes
@@ -90,13 +83,15 @@ def local(G, scoreFunction=randomScore):
             srcNode.linkTo(nodes[dstName])
             
     # start running
-    while True:
+    for i in range(100):
+        if not any(node.outputBuffer for node in nodes.values()):
+            break # IT HATH CONVERGED
+        print('step',i)
         for nodeName, node in nodes.items():
             print(nodeName)
             print(node.curState())
             print()
-            
-        input()
+        print('-'*40)
         for node in nodes.values():
             node.broadcastChanges()
         for node in nodes.values():
@@ -104,28 +99,19 @@ def local(G, scoreFunction=randomScore):
 
 
 g = Graph()
-gd = {
+gdict = {
     'A' : 'BE',
-    'B' : 'C',
-    'C' : 'DE',
-    'D' : 'E',
-    'E' : ''
+    'B' : 'AC',
+    'C' : 'BDE',
+    'D' : 'CE',
+    'E' : 'ACD'
 }
 
-for n in gd:
+for n in gdict:
     g.addNode(n)
 
-for n1, n2s in gd.items():
+for n1, n2s in gdict.items():
     for n2 in n2s:
         g.addEdge(n1, n2)
 
 local(g)
-        
-"""
-def factorial(n):
-    from functools import reduce
-    from operator import __mul__
-    return reduce(__mul__, range(1,n+1))
-
-print(factorial(10))
-"""
