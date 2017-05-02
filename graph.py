@@ -11,6 +11,9 @@ class Graph():
         self.node2data = dict()
         self.node2node2edge = defaultdict(dict)
 
+    def addNode(self, n, data=None):
+        self.node2data[n] = data
+        
     def addEdge(self, n1, n2, data=None): # undirected
         edge = Edge(n1, n2, data)
         self.node2node2edge[n1][n2] = edge
