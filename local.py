@@ -36,21 +36,21 @@ class Node():
     
     def updateSelf(self):
         for route in self.inputBuffer:
+            if self in route:
+                continue
             route.append(self)
             dst = route[0]
-            if dst is self:
-                continue
 
             pathScore = self.scoreFunction(tuple(route))
 
             if dst in self.bestRoute:
                 curBestScore = self.scoreFunction(tuple(self.bestRoute[dst]))
             else:
-                curBestScore = -1
+                curBestScore = -float('inf')
 
             if curBestScore < pathScore: # higher is better
                 self.bestRoute[dst] = route
-                outputRoute = route + [self]
+                outputRoute = route
                 for neighbor in self.neighbors:
                     self.outputBuffer.append(Message(target=neighbor, data=outputRoute[:]))
 
@@ -70,7 +70,7 @@ class Node():
         
 @memoize
 def randomScore(route):
-    return random()
+    return -len(route)
         
 def local(G, scoreFunction=randomScore):
     # instantiate nodes
@@ -81,7 +81,14 @@ def local(G, scoreFunction=randomScore):
     for srcName, srcNode in nodes.items():
         for dstName in G.getEdges(srcName):
             srcNode.linkTo(nodes[dstName])
-            
+
+    print('NEIGHBORS:')
+    for node in nodes.values():
+        print(node)
+        for neig in node.neighbors:
+            print('\t', neig)
+
+    print('\nSTART')
     # start running
     for i in range(100):
         if not any(node.outputBuffer for node in nodes.values()):
