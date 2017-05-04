@@ -13,6 +13,18 @@ def memoize(f):
 
 Message = namedtuple('Message', ['target', 'data'])
 
+class Route(list):
+    def getSrc(self):
+        return self[0]
+    def getDst(self):
+        return self[-1]
+    def isDstRepeated(self):
+        return self[-1] in self[:-1]
+    def __repr__(self):
+        return reversed(self).__repr__()
+
+
+
 class Node():
     
     def __init__(self, name, scoreFunction):
@@ -42,7 +54,7 @@ class Node():
             else:
                 route.append(self)
                 routeScore = self.scoreFunction(tuple(route))
-            
+
             dst = route[0]
             if dst in self.bestRoute:
                 curBestScore = self.scoreFunction(tuple(self.bestRoute[dst]))
@@ -68,7 +80,7 @@ class Node():
         
 @memoize
 def randomScore(route):
-    if route[-1] in route[:-1]:
+    if route.isDstRepeated():
         return -float('inf')
     return random()#len(route)
         
@@ -142,5 +154,3 @@ for nodeName, node in nodes.items():
     print(nodeName)
     print(node.curState())
     print()
-
-
