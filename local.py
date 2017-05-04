@@ -19,7 +19,8 @@ class Node():
         self.name = name
         self.scoreFunction = scoreFunction # [Node] => float
         self.neighbors = []
-        self.bestRoute = dict() # bestRoute[X] returns current best route to X
+        self.dst2nxt2curRoute = defaultdict(dict)
+        self.dst2bestRoute = dict() # bestRoute[X] returns current best route to X
         self.inputBuffer = []
         self.outputBuffer = []
 
@@ -37,17 +38,14 @@ class Node():
     def updateSelf(self):
         for route in self.inputBuffer:
             if self in route:
-                continue
-            route.append(self)
+                routeScore = -float('inf')
+            else:
+                route.append(self)
+                routeScore = self.scoreFunction(tuple(route))
+            
             dst = route[0]
-
-            pathScore = self.scoreFunction(tuple(route))
-
             if dst in self.bestRoute:
                 curBestScore = self.scoreFunction(tuple(self.bestRoute[dst]))
-            else:
-                curBestScore = -float('inf')
-
             if curBestScore < pathScore: # higher is better
                 self.bestRoute[dst] = route
                 outputRoute = route
@@ -70,7 +68,9 @@ class Node():
         
 @memoize
 def randomScore(route):
-    return -len(route)
+    if route[-1] in route[:-1]:
+        return -float('inf')
+    return random()#len(route)
         
 def local(G, scoreFunction=randomScore):
     # instantiate nodes
@@ -90,29 +90,42 @@ def local(G, scoreFunction=randomScore):
 
     print('\nSTART')
     # start running
-    for i in range(100):
+    for i in range(len(nodes)):
         if not any(node.outputBuffer for node in nodes.values()):
-            break # IT HATH CONVERGED
+            print('IT CONVERGED!')
+            break
         print('step',i)
-        for nodeName, node in nodes.items():
-            print(nodeName)
-            print(node.curState())
-            print()
         print('-'*40)
         for node in nodes.values():
             node.broadcastChanges()
         for node in nodes.values():
             node.updateSelf()
-
+    return nodes
 
 g = Graph()
+n = 100
+p = 0.05
+#A = ord('A')
+#ns = ''.join(chr(A+i) for i in range(n))
+ns = list(map(str,range(n)))
+
+gdict = dict()
+for src in ns:
+    gdict[src] = []
+    for dst in ns:
+        if src != dst and random() < p:
+            gdict[src].append(dst)
+
+"""
 gdict = {
     'A' : 'BE',
     'B' : 'AC',
     'C' : 'BDE',
     'D' : 'CE',
-    'E' : 'ACD'
+    'E' : 'ACDF',
+    'F' : 'E'
 }
+"""
 
 for n in gdict:
     g.addNode(n)
@@ -121,4 +134,13 @@ for n1, n2s in gdict.items():
     for n2 in n2s:
         g.addEdge(n1, n2)
 
-local(g)
+        
+nodes = local(g)
+
+print('END STATE!')
+for nodeName, node in nodes.items():
+    print(nodeName)
+    print(node.curState())
+    print()
+
+
