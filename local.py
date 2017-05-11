@@ -25,8 +25,6 @@ def local(G, scoreFunction=randomScore):
     # instantiate nodes
     nodes = {name: Node(name=name, scoreFunction=scoreFunction)
              for name in G.getNodes()}
-    print('nodes:')
-    print(nodes)
     # connect to neighbors
     for srcName, srcNode in nodes.items():
         for dstName in G.getEdges(srcName):
@@ -38,14 +36,13 @@ def local(G, scoreFunction=randomScore):
     #     for neig in node.neighbors:
     #         print('\t', neig)
 
-    print('\nSTART')
     # start running
     for i in range(len(nodes)):
         if not any(node.outputBuffer for node in nodes.values()):
-            print('IT CONVERGED!')
+            #print('\nIT CONVERGED!')
             break
-        print('step', i)
-        print('-'*40)
+        #print(i, end=', ')
+        #print('-'*40)
         for node in nodes.values():
             node.broadcastChanges()
         for node in nodes.values():
