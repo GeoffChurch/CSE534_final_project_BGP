@@ -13,5 +13,3 @@ def perms(n):
     return p[:n, :]
 
 #def globl(G):
-    
-    

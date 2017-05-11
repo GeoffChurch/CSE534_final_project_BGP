@@ -5,7 +5,7 @@ from graph import Graph
 
 def memoize(f):
     """ Memoization decorator for a function taking a single argument """
-    class memodict(dict):
+    class memodict(dict): 
         def __missing__(self, key):
             ret = self[key] = f(key)
             return ret
