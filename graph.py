@@ -1,5 +1,5 @@
 from collections import defaultdict
-from random import random, choice
+import random
 
 class Edge():
     def __init__(self, n1, n2, data=None):
@@ -38,49 +38,58 @@ class Graph():
         
 def randGraph(n, p):
     g = Graph()
-    ns = list(map(str,range(n)))
-    gdict = dict()
-    for src in ns:
-        gdict[src] = []
-        for dst in ns:
-            if src != dst and random() < p:
-                gdict[src].append(dst)
 
-    for n in gdict:
+    for n in range(n):
         g.addNode(n)
 
-    for n1, n2s in gdict.items():
-        for n2 in n2s:
-            g.addEdge(n1, n2)
+    for src in range(n):
+        for dst in range(src):
+            if random.random() < p:
+                g.addEdge(src, dst)
 
     return g
 
 
-def randSpanningTree(n):
+def randTree(n):
     g = Graph()
     g.addNode(0)
     for i in range(1, n):
         g.addNode(i)
-        g.addEdge(i, choice(range(i)))
+        g.addEdge(i, random.choice(range(i)))
     return g
 
 
-def randConnectedGraph(n, p):
-    g = randSpanningTree(n)
+def randConnectedGraph(n, d):
+    """
+    constructs a random connected graph on n nodes with exactly floor(n*r) edges
+    """
+    total_edges = int(n * (n - 1) * d) # floor
+    if total_edges < n - 1:
+        raise ValueError("A connected graph on {} nodes must have at least {} edges, but with edge density {} would have only {} edges.".format(n, n-1, d, total_edges))
+    g = randTree(n)
+    choices = [(src, dst) for src in range(n) for dst in range(src) if dst not in g.getEdges(src)]
+    random.shuffle(choices) # pretty space inefficient to construct whole list but guaranteed to terminate
+    choices = choices[:total_edges - (n - 1)]
+    for src, dst in choices:
+        g.addEdge(src, dst)
+    return g
+
+
+def randConnectedGraphP(n, p):
+    """
+    constructs a random connected graph on n nodes where each additional edge has probability p of being included
+    """
+    g = randTree(n)
     for src in g.getNodes():
         for dst in g.getNodes():
-            if random() < p:
+            if src != dst and random.random() < p:
                 g.addEdge(src, dst)
                 g.addEdge(dst, src)
     return g
         
 
-def randDegreeGraph(n, p):
-    pass
-
-
-def createGraph(n, p, func="rand-edge"):
+def createGraph(n, d, func):
     return {
+        "rand-graph" : randGraph,
         "rand-connected-graph" : randConnectedGraph,
-        "rand-degree" : randDegreeGraph
-    }[func](n, p)
+    }[func](n, d)
