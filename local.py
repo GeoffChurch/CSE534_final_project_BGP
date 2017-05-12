@@ -4,21 +4,16 @@ from graph import Graph
 
 from node import Node
 
-
-def memoize(f):
-    """ Memoization decorator for a function taking a single argument """
-    class memodict(dict): 
-        def __missing__(self, key):
-            ret = self[key] = f(key)
-            return ret
-    return memodict().__getitem__
-
+import sys
         
-@memoize
 def randomScore(route):
-    if route.isDstRepeated():
-        return -float('inf')
-    return random()#len(route)
+    if route.score is None:
+        if route.isSrcRepeated():
+            score = -float('inf')
+        else:
+            score = random()#len(route)
+        route.score = score
+    return route.score
         
 
 def local(G, scoreFunction=randomScore):
@@ -37,7 +32,10 @@ def local(G, scoreFunction=randomScore):
     #         print('\t', neig)
 
     # start running
+    print('\t', end='')
     for i in range(len(nodes)):
+        print(i, end=', ')
+        sys.stdout.flush()
         if not any(node.outputBuffer for node in nodes.values()):
             #print('\nIT CONVERGED!')
             break
@@ -47,47 +45,8 @@ def local(G, scoreFunction=randomScore):
             node.broadcastChanges()
         for node in nodes.values():
             node.updateSelf()
-    score = sum(n.curScore() for n in nodes.values()) / len(nodes)
-    print("score = ", score)
-    return nodes
-
-# g = Graph()
-# n = 100
-# p = 0.05
-# #A = ord('A')
-# #ns = ''.join(chr(A+i) for i in range(n))
-# ns = list(map(str,range(n)))
-
-# gdict = dict()
-# for src in ns:
-#     gdict[src] = []
-#     for dst in ns:
-#         if src != dst and random() < p:
-#             gdict[src].append(dst)
-
-"""
-gdict = {
-    'A' : 'BE',
-    'B' : 'AC',
-    'C' : 'BDE',
-    'D' : 'CE',
-    'E' : 'ACDF',
-    'F' : 'E'
-}
-"""
-
-# for n in gdict:
-#     g.addNode(n)
-
-# for n1, n2s in gdict.items():
-#     for n2 in n2s:
-#         g.addEdge(n1, n2)
-
-        
-# nodes = local(g)
-
-# print('END STATE!')
-# for nodeName, node in nodes.items():
-#     print(nodeName)
-#     print(node.curState())
-#     print()
+    print()
+    # for node in nodes.values():
+    #     for rte in node.dst2bestRoute.items():
+    #         print(rte)
+    return sum(n.curScore() for n in nodes.values()) / len(nodes)

@@ -88,8 +88,8 @@ def randConnectedGraphP(n, p):
     return g
         
 
-def createGraph(n, d, func):
+def createGraph(num_nodes, density, func):
     return {
         "rand-graph" : randGraph,
         "rand-connected-graph" : randConnectedGraph,
-    }[func](n, d)
+    }[func](num_nodes, density)

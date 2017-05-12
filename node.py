@@ -1,10 +1,9 @@
 from collections import namedtuple, defaultdict
 
 
-import route
+from linkedlist import LinkedList
 
 Message = namedtuple('Message', ['target', 'data'])
-
 
 class Node():
     
@@ -22,7 +21,7 @@ class Node():
         
         # queue a message to tell them we're neighbors
         self.outputBuffer.append(Message(target=neighbor,
-                                         data=route.Route([self])))
+                                         data=LinkedList().append(self)))
         #self.name2bestRouteandScore[dst.name] = {'path': None, 'score': -float('inf')}
 
     def __hash__(self):
@@ -33,24 +32,20 @@ class Node():
     
     def updateSelf(self):
         # print("buffer=", self.inputBuffer)
-        for route in self.inputBuffer:
-            if self in route:
-                routeScore = -float('inf')
-            else:
-                route.append(self)
-                routeScore = self.scoreFunction(route)
+        for rte in self.inputBuffer:
+            rte = rte.append(self)
+            routeScore = self.scoreFunction(rte)
 
-            dst = route[0]
+            dst = rte.getEnd()
             if dst in self.dst2bestRoute:
                 curBestScore = self.scoreFunction(self.dst2bestRoute[dst])
             else:
                 curBestScore = -float('inf')
             if curBestScore < routeScore: # higher is better
-                self.dst2bestRoute[dst] = route
-                outputRoute = route
+                self.dst2bestRoute[dst] = rte
                 for neighbor in self.neighbors:
                     self.outputBuffer.append(Message(target=neighbor,
-                                                     data=outputRoute.copy()))
+                                                     data=rte))
 
         self.inputBuffer = []
 
